@@ -1,4 +1,4 @@
-# Middleware that removes the raw body from the request
+# Middleware that caches the response code and body of an URL list
 
 [![Build Status](https://travis-ci.org/WyriHaximus/reactphp-http-middleware-response-cache.svg?branch=master)](https://travis-ci.org/WyriHaximus/reactphp-http-middleware-response-cache)
 [![Latest Stable Version](https://poser.pugx.org/WyriHaximus/react-http-middleware-response-cache/v/stable.png)](https://packagist.org/packages/WyriHaximus/react-http-middleware-response-cache)
