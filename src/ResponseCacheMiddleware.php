@@ -27,9 +27,10 @@ final class ResponseCacheMiddleware
      * @param array          $urls
      * @param CacheInterface $cache
      */
-    public function __construct(array $urls, CacheInterface $cache = null)
+    public function __construct(array $urls, array $headers = [], CacheInterface $cache = null)
     {
         $this->urls = $urls;
+        $this->headers = $headers;
         $this->cache = $cache instanceof CacheInterface ? $cache : new ArrayCache();
     }
 
@@ -49,13 +50,22 @@ final class ResponseCacheMiddleware
         return $this->cache->get($key)->then(function ($json) {
             $cachedResponse = json_decode($json);
 
-            return new Response($cachedResponse->code, [], stream_for($cachedResponse->body));
+            return new Response($cachedResponse->code, (array)$cachedResponse->headers, stream_for($cachedResponse->body));
         }, function () use ($next, $request, $key) {
             return resolve($next($request))->then(function (ResponseInterface $response) use ($key) {
                 if (!($response->getBody() instanceof HttpBodyStream)) {
                     $body = (string)$response->getBody();
+                    $headers = [];
+                    foreach ($this->headers as $header) {
+                        if (!$response->hasHeader($header)) {
+                            continue;
+                        }
+
+                        $headers[$header] = $response->getHeaderLine($header);
+                    }
                     $cachedResponse = json_encode([
                         'body' => $body,
+                        'headers' => $headers,
                         'code' => $response->getStatusCode(),
                     ]);
                     $this->cache->set($key, $cachedResponse);
