@@ -21,7 +21,7 @@ and that this middleware is might change it's behavior in the future at any time
 # Usage
 
 ```php
-$server = new Server(new MiddlewareRunner([
+$server = new Server([
     /** Other middleware */
     new ResponseCacheMiddleware(
         [
@@ -32,7 +32,7 @@ $server = new Server(new MiddlewareRunner([
         new ArrayCache() // Optional, will default to ArrayCache but any CacheInterface cache will do: https://github.com/reactphp/react/wiki/Users#cache-implementations
     ),
     /** Other middleware */
-]));
+]);
 ```
 
 # License
