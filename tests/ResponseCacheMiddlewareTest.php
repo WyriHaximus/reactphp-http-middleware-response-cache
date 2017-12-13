@@ -21,18 +21,18 @@ final class ResponseCacheMiddlewareTest extends TestCase
     {
         $thenCalledCount = 0;
         $cache = $this->prophesize(CacheInterface::class);
-        $cache->get('/')->shouldBeCalled()->willReturn(resolve('{"code":200,"body":"' . md5('/') . '"}'));
+        $cache->get('/')->shouldBeCalled()->willReturn(resolve('{"code":200,"headers":{"foo":"bar"},"body":"' . md5('/') . '"}'));
         $cache->get('/no.cache')->shouldBeCalled()->willReturn(reject());
-        $cache->set('/no.cache', '{"body":"' . md5('/no.cache') . '","code":200}')->shouldBeCalled();
+        $cache->set('/no.cache', '{"body":"' . md5('/no.cache') . '","headers":{"foo":"bar"},"code":200}')->shouldBeCalled();
         $cache->get('/stream')->shouldBeCalled()->willReturn(reject());
         $cache->set('/stream', $this->any())->shouldNotBeCalled();
         $middleware = new ResponseCacheMiddleware([
             '/',
             '/no.cache',
             '/stream',
-        ], $cache->reveal());
+        ], ['foo'], $cache->reveal());
         $next = function (ServerRequestInterface $request) {
-            return new Response(200, [], stream_for(md5($request->getUri()->getPath())));
+            return new Response(200, ['foo' => 'bar', 'bar' => 'foo'], stream_for(md5($request->getUri()->getPath())));
         };
 
         resolve($middleware(
@@ -40,6 +40,8 @@ final class ResponseCacheMiddlewareTest extends TestCase
             $next
         ))->done(function (ResponseInterface $response) use (&$thenCalledCount) {
             self::assertSame(200, $response->getStatusCode());
+            self::assertTrue($response->hasHeader('foo'));
+            self::assertSame('bar', $response->getHeaderLine('foo'));
             self::assertSame(md5('/'), (string)$response->getBody());
             $thenCalledCount++;
         });
