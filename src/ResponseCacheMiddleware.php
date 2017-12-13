@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use React\Cache\ArrayCache;
 use React\Cache\CacheInterface;
-use React\Http\HttpBodyStream;
+use React\Http\Io\HttpBodyStream;
 use React\Http\Response;
 use function React\Promise\resolve;
 use function RingCentral\Psr7\stream_for;
@@ -53,26 +53,27 @@ final class ResponseCacheMiddleware
             return new Response($cachedResponse->code, (array)$cachedResponse->headers, stream_for($cachedResponse->body));
         }, function () use ($next, $request, $key) {
             return resolve($next($request))->then(function (ResponseInterface $response) use ($key) {
-                if (!($response->getBody() instanceof HttpBodyStream)) {
-                    $body = (string)$response->getBody();
-                    $headers = [];
-                    foreach ($this->headers as $header) {
-                        if (!$response->hasHeader($header)) {
-                            continue;
-                        }
-
-                        $headers[$header] = $response->getHeaderLine($header);
-                    }
-                    $cachedResponse = json_encode([
-                        'body' => $body,
-                        'headers' => $headers,
-                        'code' => $response->getStatusCode(),
-                    ]);
-                    $this->cache->set($key, $cachedResponse);
-                    $response = $response->withBody(stream_for($body));
+                if ($response->getBody() instanceof HttpBodyStream) {
+                    return $response;
                 }
 
-                return $response;
+                $body = (string)$response->getBody();
+                $headers = [];
+                foreach ($this->headers as $header) {
+                    if (!$response->hasHeader($header)) {
+                        continue;
+                    }
+
+                    $headers[$header] = $response->getHeaderLine($header);
+                }
+                $cachedResponse = json_encode([
+                    'body' => $body,
+                    'headers' => $headers,
+                    'code' => $response->getStatusCode(),
+                ]);
+                $this->cache->set($key, $cachedResponse);
+
+                return $response->withBody(stream_for($body));
             });
         });
     }
