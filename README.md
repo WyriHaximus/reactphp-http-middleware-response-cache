@@ -29,6 +29,9 @@ $server = new Server([
             'robots.txt',
             'favicon.ico',
         ],
+        [ // Optional, array with headers to include in the cache
+            'Content-Type',
+        ],
         new ArrayCache() // Optional, will default to ArrayCache but any CacheInterface cache will do: https://github.com/reactphp/react/wiki/Users#cache-implementations
     ),
     /** Other middleware */
