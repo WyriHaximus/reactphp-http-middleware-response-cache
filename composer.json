@@ -12,10 +12,10 @@
         "php": "^7.0",
         "psr/http-message": "^1.0",
         "react/cache": "^0.4.1",
+        "react/http": "^0.8.0",
         "react/promise": "^2.5"
     },
     "require-dev": {
-        "react/http": "dev-master",
         "ringcentral/psr7": "^1.2",
         "api-clients/test-utilities": "^4.2"
     },
