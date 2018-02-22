@@ -13,6 +13,13 @@ use function RingCentral\Psr7\stream_for;
 
 final class ResponseCacheMiddleware
 {
+    const PREFIX_WITHOUT_QUERY = '***';
+    const PREFIX_WITH_QUERY = '???';
+    const PREFIXES = [
+        self::PREFIX_WITH_QUERY,
+        self::PREFIX_WITHOUT_QUERY,
+    ];
+
     /**
      * @var array
      */
@@ -21,7 +28,12 @@ final class ResponseCacheMiddleware
     /**
      * @var array
      */
-    private $prefixUrls = [];
+    private $prefixUrlsWithoutQuery = [];
+
+    /**
+     * @var array
+     */
+    private $prefixUrlsWithQuery = [];
 
     /**
      * @var CacheInterface
@@ -37,17 +49,28 @@ final class ResponseCacheMiddleware
         $this->staticUrls = array_filter(
             $urls,
             function ($url) {
-                return !(strlen($url) >= 3 && substr($url, -3) === '***');
+                return !(strlen($url) >= 3 && in_array(substr($url, -3), self::PREFIXES));
             }
         );
-        $this->prefixUrls = array_map(
+        $this->prefixUrlsWithoutQuery = array_map(
             function ($url) {
                 return substr($url, 0, -3);
             },
             array_filter(
                 $urls,
                 function ($url) {
-                    return strlen($url) >= 3 && substr($url, -3) === '***';
+                    return strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITHOUT_QUERY;
+                }
+            )
+        );
+        $this->prefixUrlsWithQuery = array_map(
+            function ($url) {
+                return substr($url, 0, -3);
+            },
+            array_filter(
+                $urls,
+                function ($url) {
+                    return strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITH_QUERY;
                 }
             )
         );
@@ -68,6 +91,10 @@ final class ResponseCacheMiddleware
         }
 
         $key = $uri;
+        $query = $request->getUri()->getQuery();
+        if (strlen($query) > 0 && $this->queryInKey($uri)) {
+            $key .= '?' . $query;
+        }
 
         return $this->cache->get($key)->then(function ($json) {
             $cachedResponse = json_decode($json);
@@ -102,7 +129,26 @@ final class ResponseCacheMiddleware
 
     private function matchesPrefixUrl(string $uri): bool
     {
-        foreach ($this->prefixUrls as $url) {
+        foreach ($this->prefixUrlsWithoutQuery as $url) {
+            $urlLength = strlen($url);
+            if (substr($uri, 0, $urlLength) === $url) {
+                return true;
+            }
+        }
+
+        foreach ($this->prefixUrlsWithQuery as $url) {
+            $urlLength = strlen($url);
+            if (substr($uri, 0, $urlLength) === $url) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function queryInKey(string $uri): bool
+    {
+        foreach ($this->prefixUrlsWithQuery as $url) {
             $urlLength = strlen($url);
             if (substr($uri, 0, $urlLength) === $url) {
                 return true;

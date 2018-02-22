@@ -28,11 +28,14 @@ final class ResponseCacheMiddlewareTest extends TestCase
         $cache->set('/stream', $this->any())->shouldNotBeCalled();
         $cache->get('/wildcard/blaat')->shouldBeCalled()->willReturn(reject());
         $cache->set('/wildcard/blaat', '{"body":"' . md5('/wildcard/blaat') . '","headers":{"foo":"bar"},"code":200}')->shouldBeCalled();
+        $cache->get('/api/blaat?q=q')->shouldBeCalled()->willReturn(reject());
+        $cache->set('/api/blaat?q=q', '{"body":"' . md5('/api/blaat') . '","headers":{"foo":"bar"},"code":200}')->shouldBeCalled();
         $middleware = new ResponseCacheMiddleware([
             '/',
             '/no.cache',
             '/stream',
             '/wildcard***',
+            '/api???',
         ], ['foo'], $cache->reveal());
         $next = function (ServerRequestInterface $request) {
             return new Response(200, ['foo' => 'bar', 'bar' => 'foo'], stream_for(md5($request->getUri()->getPath())));
@@ -71,7 +74,7 @@ final class ResponseCacheMiddlewareTest extends TestCase
         });
 
         resolve($middleware(
-            new ServerRequest('GET', 'https://example.com/wildcard/blaat'),
+            new ServerRequest('GET', 'https://example.com/wildcard/blaat?q=q'),
             $next
         ))->done(function (ResponseInterface $response) use (&$thenCalledCount) {
             self::assertSame(200, $response->getStatusCode());
@@ -79,6 +82,15 @@ final class ResponseCacheMiddlewareTest extends TestCase
             $thenCalledCount++;
         });
 
-        self::assertSame(4, $thenCalledCount);
+        resolve($middleware(
+            new ServerRequest('GET', 'https://example.com/api/blaat?q=q'),
+            $next
+        ))->done(function (ResponseInterface $response) use (&$thenCalledCount) {
+            self::assertSame(200, $response->getStatusCode());
+            self::assertSame(md5('/api/blaat'), (string)$response->getBody());
+            $thenCalledCount++;
+        });
+
+        self::assertSame(5, $thenCalledCount);
     }
 }

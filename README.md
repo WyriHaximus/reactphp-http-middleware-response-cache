@@ -29,6 +29,7 @@ $server = new Server([
             '/robots.txt',
             '/favicon.ico',
             '/cache/***', // Anything that starts with /cache/ in the path will be cached
+            '/api/???', // Anything that starts with /cache/ in the path will be cached (query is included in the cache key)
         ],
         [ // Optional, array with headers to include in the cache
             'Content-Type',
