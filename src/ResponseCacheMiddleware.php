@@ -46,35 +46,7 @@ final class ResponseCacheMiddleware
      */
     public function __construct(array $urls, array $headers = [], CacheInterface $cache = null)
     {
-        $this->staticUrls = array_filter(
-            $urls,
-            function ($url) {
-                return !(strlen($url) >= 3 && in_array(substr($url, -3), self::PREFIXES));
-            }
-        );
-        $this->prefixUrlsWithoutQuery = array_map(
-            function ($url) {
-                return substr($url, 0, -3);
-            },
-            array_filter(
-                $urls,
-                function ($url) {
-                    return strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITHOUT_QUERY;
-                }
-            )
-        );
-        $this->prefixUrlsWithQuery = array_map(
-            function ($url) {
-                return substr($url, 0, -3);
-            },
-            array_filter(
-                $urls,
-                function ($url) {
-                    return strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITH_QUERY;
-                }
-            )
-        );
-
+        $this->sortUrls($urls);
         $this->headers = $headers;
         $this->cache = $cache instanceof CacheInterface ? $cache : new ArrayCache();
     }
@@ -127,28 +99,46 @@ final class ResponseCacheMiddleware
         });
     }
 
+    private function sortUrls(array $urls)
+    {
+        foreach ($urls as $url) {
+            if (!(strlen($url) >= 3 && in_array(substr($url, -3), self::PREFIXES, true))) {
+                $this->staticUrls[] = $url;
+
+                continue;
+            }
+
+            if (strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITHOUT_QUERY) {
+                $this->prefixUrlsWithoutQuery[] = substr($url, 0, -3);
+
+                continue;
+            }
+
+            if (strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITH_QUERY) {
+                $this->prefixUrlsWithQuery[] = substr($url, 0, -3);
+
+                continue;
+            }
+        }
+    }
+
     private function matchesPrefixUrl(string $uri): bool
     {
-        foreach ($this->prefixUrlsWithoutQuery as $url) {
-            $urlLength = strlen($url);
-            if (substr($uri, 0, $urlLength) === $url) {
-                return true;
-            }
+        if ($this->urlMatchesPrefixes($this->prefixUrlsWithoutQuery, $uri)) {
+            return true;
         }
 
-        foreach ($this->prefixUrlsWithQuery as $url) {
-            $urlLength = strlen($url);
-            if (substr($uri, 0, $urlLength) === $url) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->urlMatchesPrefixes($this->prefixUrlsWithQuery, $uri);
     }
 
     private function queryInKey(string $uri): bool
     {
-        foreach ($this->prefixUrlsWithQuery as $url) {
+        return $this->urlMatchesPrefixes($this->prefixUrlsWithQuery, $uri);
+    }
+
+    private function urlMatchesPrefixes(array $urls, string $uri): bool
+    {
+        foreach ($urls as $url) {
             $urlLength = strlen($url);
             if (substr($uri, 0, $urlLength) === $url) {
                 return true;
