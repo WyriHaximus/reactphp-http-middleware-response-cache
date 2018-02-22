@@ -16,7 +16,12 @@ final class ResponseCacheMiddleware
     /**
      * @var array
      */
-    private $urls = [];
+    private $staticUrls = [];
+
+    /**
+     * @var array
+     */
+    private $prefixUrls = [];
 
     /**
      * @var CacheInterface
@@ -29,7 +34,24 @@ final class ResponseCacheMiddleware
      */
     public function __construct(array $urls, array $headers = [], CacheInterface $cache = null)
     {
-        $this->urls = $urls;
+        $this->staticUrls = array_filter(
+            $urls,
+            function ($url) {
+                return !(strlen($url) >= 3 && substr($url, -3) === '***');
+            }
+        );
+        $this->prefixUrls = array_map(
+            function ($url) {
+                return substr($url, 0, -3);
+            },
+            array_filter(
+                $urls,
+                function ($url) {
+                    return strlen($url) >= 3 && substr($url, -3) === '***';
+                }
+            )
+        );
+
         $this->headers = $headers;
         $this->cache = $cache instanceof CacheInterface ? $cache : new ArrayCache();
     }
@@ -41,7 +63,7 @@ final class ResponseCacheMiddleware
         }
 
         $uri = $request->getUri()->getPath();
-        if (!in_array($uri, $this->urls, true)) {
+        if (!in_array($uri, $this->staticUrls, true) && !$this->matchesPrefixUrl($uri)) {
             return resolve($next($request));
         }
 
@@ -76,5 +98,17 @@ final class ResponseCacheMiddleware
                 return $response->withBody(stream_for($body));
             });
         });
+    }
+
+    private function matchesPrefixUrl(string $uri): bool
+    {
+        foreach ($this->prefixUrls as $url) {
+            $urlLength = strlen($url);
+            if (substr($uri, 0, $urlLength) === $url) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -26,10 +26,13 @@ final class ResponseCacheMiddlewareTest extends TestCase
         $cache->set('/no.cache', '{"body":"' . md5('/no.cache') . '","headers":{"foo":"bar"},"code":200}')->shouldBeCalled();
         $cache->get('/stream')->shouldBeCalled()->willReturn(reject());
         $cache->set('/stream', $this->any())->shouldNotBeCalled();
+        $cache->get('/wildcard/blaat')->shouldBeCalled()->willReturn(reject());
+        $cache->set('/wildcard/blaat', '{"body":"' . md5('/wildcard/blaat') . '","headers":{"foo":"bar"},"code":200}')->shouldBeCalled();
         $middleware = new ResponseCacheMiddleware([
             '/',
             '/no.cache',
             '/stream',
+            '/wildcard***',
         ], ['foo'], $cache->reveal());
         $next = function (ServerRequestInterface $request) {
             return new Response(200, ['foo' => 'bar', 'bar' => 'foo'], stream_for(md5($request->getUri()->getPath())));
@@ -67,6 +70,15 @@ final class ResponseCacheMiddlewareTest extends TestCase
             $thenCalledCount++;
         });
 
-        self::assertSame(3, $thenCalledCount);
+        resolve($middleware(
+            new ServerRequest('GET', 'https://example.com/wildcard/blaat'),
+            $next
+        ))->done(function (ResponseInterface $response) use (&$thenCalledCount) {
+            self::assertSame(200, $response->getStatusCode());
+            self::assertSame(md5('/wildcard/blaat'), (string)$response->getBody());
+            $thenCalledCount++;
+        });
+
+        self::assertSame(4, $thenCalledCount);
     }
 }

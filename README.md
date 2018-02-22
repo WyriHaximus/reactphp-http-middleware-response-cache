@@ -26,8 +26,9 @@ $server = new Server([
     new ResponseCacheMiddleware(
         [
             '/',
-            'robots.txt',
-            'favicon.ico',
+            '/robots.txt',
+            '/favicon.ico',
+            '/cache/***', // Anything that starts with /cache/ in the path will be cached
         ],
         [ // Optional, array with headers to include in the cache
             'Content-Type',
