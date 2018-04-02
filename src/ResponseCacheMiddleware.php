@@ -57,6 +57,14 @@ final class ResponseCacheMiddleware
             return resolve($next($request));
         }
 
+        if (
+            class_exists(SessionMiddleware::class) &&
+            $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME) !== null &&
+            $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME)->isActive() === true
+        ) {
+            return resolve($next($request));
+        }
+
         $uri = $request->getUri()->getPath();
         if (!in_array($uri, $this->staticUrls, true) && !$this->matchesPrefixUrl($uri)) {
             return resolve($next($request));
