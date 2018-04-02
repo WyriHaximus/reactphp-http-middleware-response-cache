@@ -13,11 +13,11 @@ use React\Http\Io\ServerRequest;
 use React\Http\Response;
 use React\Stream\ThroughStream;
 use WyriHaximus\React\Http\Middleware\ResponseCacheMiddleware;
+use WyriHaximus\React\Http\Middleware\Session;
+use WyriHaximus\React\Http\Middleware\SessionMiddleware;
 use function React\Promise\reject;
 use function React\Promise\resolve;
 use function RingCentral\Psr7\stream_for;
-use WyriHaximus\React\Http\Middleware\Session;
-use WyriHaximus\React\Http\Middleware\SessionMiddleware;
 
 final class ResponseCacheMiddlewareTest extends TestCase
 {
@@ -81,7 +81,7 @@ final class ResponseCacheMiddlewareTest extends TestCase
                 $stream = new HttpBodyStream(new ThroughStream(), 1024);
 
                 return new Response(200, [], $stream);
-            }
+            },
         ]))(
             new ServerRequest('GET', 'https://example.com/stream')
         ))->done(function (ResponseInterface $response) use (&$thenCalledCount) {
@@ -118,7 +118,7 @@ final class ResponseCacheMiddlewareTest extends TestCase
                 $sessionId = $session->getId();
 
                 return new Response(200, [], stream_for('craft-session'));
-            }
+            },
         ]))(
             new ServerRequest('GET', 'https://example.com/craft-session')
         ))->done(function (ResponseInterface $response) use (&$thenCalledCount) {
@@ -132,7 +132,7 @@ final class ResponseCacheMiddlewareTest extends TestCase
             $middleware,
             function (ServerRequestInterface $request) {
                 return new Response(200, [], stream_for('no-cache'));
-            }
+            },
         ]))(
             (new ServerRequest('GET', 'https://example.com/'))->withCookieParams(['Thrall' => $sessionId])
         ))->done(function (ResponseInterface $response) use (&$thenCalledCount) {
