@@ -41,8 +41,9 @@ final class ResponseCacheMiddleware
     private $cache;
 
     /**
-     * @param array          $urls
-     * @param CacheInterface $cache
+     * @param array               $urls
+     * @param array               $headers
+     * @param CacheInterface|null $cache
      */
     public function __construct(array $urls, array $headers = [], CacheInterface $cache = null)
     {
