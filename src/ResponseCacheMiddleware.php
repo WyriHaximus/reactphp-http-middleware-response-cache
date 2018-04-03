@@ -2,6 +2,8 @@
 
 namespace WyriHaximus\React\Http\Middleware;
 
+use Lcobucci\Clock\Clock;
+use Lcobucci\Clock\SystemClock;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use React\Cache\ArrayCache;
@@ -41,15 +43,22 @@ final class ResponseCacheMiddleware
     private $cache;
 
     /**
+     * @var Clock
+     */
+    private $clock;
+
+    /**
      * @param array               $urls
      * @param array               $headers
      * @param CacheInterface|null $cache
+     * @param Clock               $clock
      */
-    public function __construct(array $urls, array $headers = [], CacheInterface $cache = null)
+    public function __construct(array $urls, array $headers = [], CacheInterface $cache = null, Clock $clock = null)
     {
         $this->sortUrls($urls);
         $this->headers = $headers;
         $this->cache = $cache instanceof CacheInterface ? $cache : new ArrayCache();
+        $this->clock = $clock instanceof CacheInterface ? $clock : new SystemClock();
     }
 
     public function __invoke(ServerRequestInterface $request, callable $next)
@@ -71,8 +80,13 @@ final class ResponseCacheMiddleware
 
         return $this->cache->get($key)->then(function ($json) {
             $cachedResponse = json_decode($json);
+            $headers = (array)$cachedResponse->headers;
+            // Todo at 2 October 2018 remove the check around this assignment
+            if (isset($cachedResponse->time)) {
+                $headers['Age'] = (int)$this->clock->now()->format('U') - (string)$cachedResponse->time;
+            }
 
-            return new Response($cachedResponse->code, (array)$cachedResponse->headers, stream_for($cachedResponse->body));
+            return new Response($cachedResponse->code, $headers, stream_for($cachedResponse->body));
         }, function () use ($next, $request, $key) {
             return resolve($next($request))->then(function (ResponseInterface $response) use ($key) {
                 if ($response->getBody() instanceof HttpBodyStream) {
@@ -92,6 +106,7 @@ final class ResponseCacheMiddleware
                     'body' => $body,
                     'headers' => $headers,
                     'code' => $response->getStatusCode(),
+                    'time' => (int)$this->clock->now()->format('U'),
                 ]);
                 $this->cache->set($key, $cachedResponse);
 
