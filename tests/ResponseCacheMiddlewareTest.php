@@ -2,6 +2,8 @@
 
 namespace WyriHaximus\React\Tests\Http\Middleware;
 
+use DateTimeImmutable;
+use Lcobucci\Clock\FrozenClock;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,23 +22,25 @@ final class ResponseCacheMiddlewareTest extends TestCase
     public function testWithHeaders()
     {
         $thenCalledCount = 0;
+        $clock = new FrozenClock(new DateTimeImmutable('now'));
+        $now = $clock->now()->format('U');
         $cache = $this->prophesize(CacheInterface::class);
-        $cache->get('/')->shouldBeCalled()->willReturn(resolve('{"code":200,"headers":{"foo":"bar"},"body":"' . md5('/') . '"}'));
+        $cache->get('/')->shouldBeCalled()->willReturn(resolve('{"code":200,"headers":{"foo":"bar"},"body":"' . md5('/') . '","time":' . $now . '}'));
         $cache->get('/no.cache')->shouldBeCalled()->willReturn(reject());
-        $cache->set('/no.cache', '{"body":"' . md5('/no.cache') . '","headers":{"foo":"bar"},"code":200}')->shouldBeCalled();
+        $cache->set('/no.cache', '{"body":"' . md5('/no.cache') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}')->shouldBeCalled();
         $cache->get('/stream')->shouldBeCalled()->willReturn(reject());
         $cache->set('/stream', $this->any())->shouldNotBeCalled();
         $cache->get('/wildcard/blaat')->shouldBeCalled()->willReturn(reject());
-        $cache->set('/wildcard/blaat', '{"body":"' . md5('/wildcard/blaat') . '","headers":{"foo":"bar"},"code":200}')->shouldBeCalled();
+        $cache->set('/wildcard/blaat', '{"body":"' . md5('/wildcard/blaat') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}')->shouldBeCalled();
         $cache->get('/api/blaat?q=q')->shouldBeCalled()->willReturn(reject());
-        $cache->set('/api/blaat?q=q', '{"body":"' . md5('/api/blaat') . '","headers":{"foo":"bar"},"code":200}')->shouldBeCalled();
+        $cache->set('/api/blaat?q=q', '{"body":"' . md5('/api/blaat') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}')->shouldBeCalled();
         $middleware = new ResponseCacheMiddleware([
             '/',
             '/no.cache',
             '/stream',
             '/wildcard***',
             '/api???',
-        ], ['foo'], $cache->reveal());
+        ], ['foo'], $cache->reveal(), $clock);
         $next = function (ServerRequestInterface $request) {
             return new Response(200, ['foo' => 'bar', 'bar' => 'foo'], stream_for(md5($request->getUri()->getPath())));
         };
@@ -49,6 +53,7 @@ final class ResponseCacheMiddlewareTest extends TestCase
             self::assertTrue($response->hasHeader('foo'));
             self::assertSame('bar', $response->getHeaderLine('foo'));
             self::assertSame(md5('/'), (string)$response->getBody());
+            self::assertSame('0', $response->getHeaderLine('Age'));
             $thenCalledCount++;
         });
 
@@ -91,6 +96,18 @@ final class ResponseCacheMiddlewareTest extends TestCase
             $thenCalledCount++;
         });
 
-        self::assertSame(5, $thenCalledCount);
+        sleep(1);
+        $clock->setTo(new DateTimeImmutable('now'));
+
+        resolve($middleware(
+            new ServerRequest('GET', 'https://example.com/'),
+            $next
+        ))->done(function (ResponseInterface $response) use (&$thenCalledCount) {
+            self::assertSame(200, $response->getStatusCode());
+            self::assertSame('1', $response->getHeaderLine('Age'));
+            $thenCalledCount++;
+        });
+
+        self::assertSame(6, $thenCalledCount);
     }
 }
