@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "972b7b48795ee4fdc0ebd3204dc45fe3",
+    "content-hash": "1ea506242464750d5f2186a670e0be00",
     "packages": [
         {
             "name": "evenement/evenement",
@@ -48,6 +48,50 @@
                 "event-emitter"
             ],
             "time": "2017-07-23T21:35:13+00:00"
+        },
+        {
+            "name": "lcobucci/clock",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lcobucci/clock.git",
+                "reference": "d11d20b6a3df872d34f3b18d5bf4cbe5a01a2451"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lcobucci/clock/zipball/d11d20b6a3df872d34f3b18d5bf4cbe5a01a2451",
+                "reference": "d11d20b6a3df872d34f3b18d5bf4cbe5a01a2451",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.1"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Lcobucci\\Clock\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Luís Cobucci",
+                    "email": "lcobucci@gmail.com"
+                }
+            ],
+            "description": "Yet another clock abstraction",
+            "time": "2018-01-19T15:38:44+00:00"
         },
         {
             "name": "psr/http-message",
@@ -101,43 +145,37 @@
         },
         {
             "name": "react/cache",
-            "version": "v0.4.2",
+            "version": "v0.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/cache.git",
-                "reference": "75494f26b4ef089db9bf8c90b63c296246e099e8"
+                "reference": "558f614891341b1d817a8cdf9a358948ec49638f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/cache/zipball/75494f26b4ef089db9bf8c90b63c296246e099e8",
-                "reference": "75494f26b4ef089db9bf8c90b63c296246e099e8",
+                "url": "https://api.github.com/repos/reactphp/cache/zipball/558f614891341b1d817a8cdf9a358948ec49638f",
+                "reference": "558f614891341b1d817a8cdf9a358948ec49638f",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0",
                 "react/promise": "~2.0|~1.1"
             },
-            "require-dev": {
-                "phpunit/phpunit": "^6.4 || ^5.7 || ^4.8.35"
-            },
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "React\\Cache\\": "src/"
+                    "React\\Cache\\": "src\\"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
-            "description": "Async, Promise-based cache interface for ReactPHP",
+            "description": "Async caching.",
             "keywords": [
-                "cache",
-                "caching",
-                "promise",
-                "reactphp"
+                "cache"
             ],
-            "time": "2017-12-20T16:47:13+00:00"
+            "time": "2016-02-25T18:17:16+00:00"
         },
         {
             "name": "react/dns",
@@ -229,16 +267,16 @@
         },
         {
             "name": "react/http",
-            "version": "v0.8.1",
+            "version": "v0.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/http.git",
-                "reference": "92deba861d5a1320584450cfa61622a2969b00ef"
+                "reference": "0410c94463bdae4bdf34d60bff91e9e1eb4a6652"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/http/zipball/92deba861d5a1320584450cfa61622a2969b00ef",
-                "reference": "92deba861d5a1320584450cfa61622a2969b00ef",
+                "url": "https://api.github.com/repos/reactphp/http/zipball/0410c94463bdae4bdf34d60bff91e9e1eb4a6652",
+                "reference": "0410c94463bdae4bdf34d60bff91e9e1eb4a6652",
                 "shasum": ""
             },
             "require": {
@@ -273,7 +311,7 @@
                 "server",
                 "streaming"
             ],
-            "time": "2018-01-05T15:30:50+00:00"
+            "time": "2017-12-12T13:01:48+00:00"
         },
         {
             "name": "react/promise",
@@ -1048,65 +1086,6 @@
             "time": "2017-08-23T07:46:41+00:00"
         },
         {
-            "name": "hansott/psr7-cookies",
-            "version": "1.0.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/hansott/psr7-cookies.git",
-                "reference": "2d734eec9272fe268db25212571fcd7b7bc25767"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/hansott/psr7-cookies/zipball/2d734eec9272fe268db25212571fcd7b7bc25767",
-                "reference": "2d734eec9272fe268db25212571fcd7b7bc25767",
-                "shasum": ""
-            },
-            "require": {
-                "php": "~7.0",
-                "psr/http-message": "^1.0"
-            },
-            "require-dev": {
-                "guzzlehttp/psr7": "^1.3",
-                "phpunit/phpunit": "~4.0||~5.0",
-                "scrutinizer/ocular": "~1.1",
-                "squizlabs/php_codesniffer": "~2.3"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "HansOtt\\PSR7Cookies\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Hans Ott",
-                    "email": "hansott@hotmail.be",
-                    "homepage": "https://hansott.github.io",
-                    "role": "Developer"
-                }
-            ],
-            "description": "PSR-7 Cookies",
-            "homepage": "https://github.com/hansott/psr7-cookies",
-            "keywords": [
-                "cookies",
-                "fig",
-                "hansott",
-                "http-message",
-                "psr7-cookies",
-                "setcookie"
-            ],
-            "time": "2016-07-10T09:41:06+00:00"
-        },
-        {
             "name": "jakub-onderka/php-console-color",
             "version": "0.1",
             "source": {
@@ -1521,9 +1500,6 @@
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause|MIT"
-            ],
             "authors": [
                 {
                     "name": "Kore Nordmann",
@@ -3457,65 +3433,18 @@
                 "validate"
             ],
             "time": "2016-11-23T20:04:58+00:00"
-        },
-        {
-            "name": "wyrihaximus/react-http-middleware-session",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/WyriHaximus/reactphp-http-middleware-session.git",
-                "reference": "a453812067f868ac5dc27e30f5403e1357a35327"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/WyriHaximus/reactphp-http-middleware-session/zipball/a453812067f868ac5dc27e30f5403e1357a35327",
-                "reference": "a453812067f868ac5dc27e30f5403e1357a35327",
-                "shasum": ""
-            },
-            "require": {
-                "hansott/psr7-cookies": "^1.0",
-                "php": "^7.0",
-                "psr/http-message": "^1.0",
-                "react/cache": "^0.4.2",
-                "react/http": "^0.8.0",
-                "react/promise": "^2.5"
-            },
-            "require-dev": {
-                "api-clients/test-utilities": "^4.2",
-                "ringcentral/psr7": "^1.2.2"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "WyriHaximus\\React\\Http\\Middleware\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Cees-Jan Kiewiet",
-                    "email": "ceesjank@gmail.com"
-                }
-            ],
-            "description": "react/http middleware that takes care of session handling",
-            "time": "2018-03-29T08:36:55+00:00"
         }
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "wyrihaximus/react-http-middleware-session": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.0"
+        "php": "^7.1"
     },
     "platform-dev": [],
     "platform-overrides": {
-        "php": "7.0"
+        "php": "7.1"
     }
 }
