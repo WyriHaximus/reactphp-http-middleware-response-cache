@@ -27,6 +27,8 @@ final class ResponseCacheMiddlewareTest extends TestCase
     {
         $sessionCache = new ArrayCache();
         $thenCalledCount = 0;
+        $clock = new FrozenClock(new DateTimeImmutable('now'));
+        $now = $clock->now()->format('U');
         $cache = $this->prophesize(CacheInterface::class);
         $cache->get('/')->shouldBeCalled()->willReturn(resolve('{"code":200,"headers":{"foo":"bar"},"body":"' . md5('/') . '","time":' . $now . '}'));
         $cache->get('/no.cache')->shouldBeCalled()->willReturn(reject());
@@ -36,25 +38,11 @@ final class ResponseCacheMiddlewareTest extends TestCase
         $cache->get('/wildcard/blaat')->shouldBeCalled()->willReturn(reject());
         $cache->set('/wildcard/blaat', '{"body":"' . md5('/wildcard/blaat') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}')->shouldBeCalled();
         $cache->get('/api/blaat?q=q')->shouldBeCalled()->willReturn(reject());
-        $cache->set('/api/blaat?q=q', '{"body":"' . md5('/api/blaat') . '","headers":{"foo":"bar"},"code":200}')->shouldBeCalled();
+        $cache->set('/api/blaat?q=q', '{"body":"' . md5('/api/blaat') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}')->shouldBeCalled();
         $sessionMiddleware = new SessionMiddleware(
             'Thrall',
             $sessionCache
         );
-        $middleware = new ResponseCacheMiddleware(
-            [
-                '/',
-                '/no.cache',
-                '/stream',
-                '/wildcard***',
-                '/api???',
-            ],
-            [
-                'foo',
-            ],
-            $cache->reveal()
-        );
-        $cache->set('/api/blaat?q=q', '{"body":"' . md5('/api/blaat') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}')->shouldBeCalled();
         $middleware = new ResponseCacheMiddleware([
             '/',
             '/no.cache',
@@ -152,7 +140,6 @@ final class ResponseCacheMiddlewareTest extends TestCase
             $thenCalledCount++;
         });
 
-        self::assertSame(7, $thenCalledCount);
         sleep(1);
         $clock->setTo(new DateTimeImmutable('now'));
 
@@ -165,6 +152,6 @@ final class ResponseCacheMiddlewareTest extends TestCase
             $thenCalledCount++;
         });
 
-        self::assertSame(6, $thenCalledCount);
+        self::assertSame(8, $thenCalledCount);
     }
 }
