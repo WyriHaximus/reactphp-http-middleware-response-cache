@@ -27,7 +27,8 @@ final class ResponseCacheMiddlewareTest extends TestCase
     {
         $sessionCache = new ArrayCache();
         $thenCalledCount = 0;
-        $clock = new FrozenClock(new DateTimeImmutable('now'));
+        $time = new DateTimeImmutable('now');
+        $clock = new FrozenClock($time);
         $now = $clock->now()->format('U');
         $cache = $this->prophesize(CacheInterface::class);
         $cache->get('/')->shouldBeCalled()->willReturn(resolve('{"code":200,"headers":{"foo":"bar"},"body":"' . md5('/') . '","time":' . $now . '}'));
@@ -140,8 +141,7 @@ final class ResponseCacheMiddlewareTest extends TestCase
             $thenCalledCount++;
         });
 
-        sleep(1);
-        $clock->setTo(new DateTimeImmutable('now'));
+        $clock->setTo($time->modify('+1 second'));
 
         resolve($middleware(
             new ServerRequest('GET', 'https://example.com/'),
