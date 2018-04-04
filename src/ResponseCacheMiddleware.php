@@ -58,7 +58,7 @@ final class ResponseCacheMiddleware
         $this->sortUrls($urls);
         $this->headers = $headers;
         $this->cache = $cache instanceof CacheInterface ? $cache : new ArrayCache();
-        $this->clock = $clock instanceof CacheInterface ? $clock : new SystemClock();
+        $this->clock = $clock instanceof Clock ? $clock : new SystemClock();
     }
 
     public function __invoke(ServerRequestInterface $request, callable $next)
