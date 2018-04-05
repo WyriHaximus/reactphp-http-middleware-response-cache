@@ -190,6 +190,5 @@ final class ResponseCacheMiddlewareTest extends TestCase
             self::assertSame('no-cache', (string)$response->getBody());
             $thenCalledCount++;
         });
-
     }
 }
