@@ -14,6 +14,7 @@ use React\Http\Io\MiddlewareRunner;
 use React\Http\Io\ServerRequest;
 use React\Http\Response;
 use React\Stream\ThroughStream;
+use WyriHaximus\React\Http\Middleware\CacheConfiguration;
 use WyriHaximus\React\Http\Middleware\ResponseCacheMiddleware;
 use WyriHaximus\React\Http\Middleware\Session;
 use WyriHaximus\React\Http\Middleware\SessionMiddleware;
@@ -31,26 +32,26 @@ final class ResponseCacheMiddlewareTest extends TestCase
         $clock = new FrozenClock($time);
         $now = $clock->now()->format('U');
         $cache = $this->prophesize(CacheInterface::class);
-        $cache->get('/')->shouldBeCalled()->willReturn(resolve('{"code":200,"headers":{"foo":"bar"},"body":"' . md5('/') . '","time":' . $now . '}'));
+        $cache->get('/')->shouldBeCalled()->willReturn(resolve(json_decode('{"code":200,"headers":{"foo":"bar"},"body":"' . md5('/') . '","time":' . $now . '}', true)));
         $cache->get('/no.cache')->shouldBeCalled()->willReturn(reject());
-        $cache->set('/no.cache', '{"body":"' . md5('/no.cache') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}')->shouldBeCalled();
+        $cache->set('/no.cache', json_decode('{"body":"' . md5('/no.cache') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}', true))->shouldBeCalled();
         $cache->get('/stream')->shouldBeCalled()->willReturn(reject());
         $cache->set('/stream', $this->any())->shouldNotBeCalled();
         $cache->get('/wildcard/blaat')->shouldBeCalled()->willReturn(reject());
-        $cache->set('/wildcard/blaat', '{"body":"' . md5('/wildcard/blaat') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}')->shouldBeCalled();
+        $cache->set('/wildcard/blaat', json_decode('{"body":"' . md5('/wildcard/blaat') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}', true))->shouldBeCalled();
         $cache->get('/api/blaat?q=q')->shouldBeCalled()->willReturn(reject());
-        $cache->set('/api/blaat?q=q', '{"body":"' . md5('/api/blaat') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}')->shouldBeCalled();
+        $cache->set('/api/blaat?q=q', json_decode('{"body":"' . md5('/api/blaat') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}', true))->shouldBeCalled();
         $sessionMiddleware = new SessionMiddleware(
             'Thrall',
             $sessionCache
         );
-        $middleware = new ResponseCacheMiddleware([
+        $middleware = new ResponseCacheMiddleware(new CacheConfiguration([
             '/',
             '/no.cache',
             '/stream',
             '/wildcard***',
             '/api???',
-        ], ['foo'], $cache->reveal(), $clock);
+        ], ['foo'], $clock), $cache->reveal());
         $next = function (ServerRequestInterface $request) {
             return new Response(200, ['foo' => 'bar', 'bar' => 'foo'], stream_for(md5($request->getUri()->getPath())));
         };
@@ -159,7 +160,6 @@ final class ResponseCacheMiddlewareTest extends TestCase
     {
         $sessionCache = new ArrayCache();
         $thenCalledCount = 0;
-        $time = new DateTimeImmutable('now');
         $cache = $this->prophesize(CacheInterface::class);
         $cache->get('/')->shouldBeCalled()->willReturn(reject());
         $cache->set('/')->shouldNotBeCalled();
@@ -167,9 +167,9 @@ final class ResponseCacheMiddlewareTest extends TestCase
             'Thrall',
             $sessionCache
         );
-        $middleware = new ResponseCacheMiddleware([
+        $middleware = new ResponseCacheMiddleware(new CacheConfiguration([
             '/',
-        ], ['foo'], $cache->reveal());
+        ], ['foo']), $cache->reveal());
         $next = function (ServerRequestInterface $request) {
             /** @var Session $session */
             $session = $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME);
