@@ -67,11 +67,16 @@ final class ResponseCacheMiddleware
             return resolve($next($request));
         }
 
+        /** @var Session $session */
+        $session = null;
         if (
             class_exists(SessionMiddleware::class) &&
-            $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME) !== null &&
-            $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME)->isActive() === true
+            $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME) !== null
         ) {
+            $session = $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME);
+        }
+
+        if ($session !== null && $session->isActive() === true) {
             return resolve($next($request));
         }
 
@@ -95,9 +100,13 @@ final class ResponseCacheMiddleware
             }
 
             return new Response($cachedResponse->code, $headers, stream_for($cachedResponse->body));
-        }, function () use ($next, $request, $key) {
-            return resolve($next($request))->then(function (ResponseInterface $response) use ($key) {
+        }, function () use ($next, $request, $key, $session) {
+            return resolve($next($request))->then(function (ResponseInterface $response) use ($key, $session) {
                 if ($response->getBody() instanceof HttpBodyStream) {
+                    return $response;
+                }
+
+                if ($session !== null && $session->isActive() === true) {
                     return $response;
                 }
 

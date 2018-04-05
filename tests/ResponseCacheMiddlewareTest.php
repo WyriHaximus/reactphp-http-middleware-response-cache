@@ -23,7 +23,7 @@ use function RingCentral\Psr7\stream_for;
 
 final class ResponseCacheMiddlewareTest extends TestCase
 {
-    public function testWithHeaders()
+    public function testBasics()
     {
         $sessionCache = new ArrayCache();
         $thenCalledCount = 0;
@@ -153,5 +153,43 @@ final class ResponseCacheMiddlewareTest extends TestCase
         });
 
         self::assertSame(8, $thenCalledCount);
+    }
+
+    public function testDonStoretCacheWhenSessionJustStarted()
+    {
+        $sessionCache = new ArrayCache();
+        $thenCalledCount = 0;
+        $time = new DateTimeImmutable('now');
+        $cache = $this->prophesize(CacheInterface::class);
+        $cache->get('/')->shouldBeCalled()->willReturn(reject());
+        $cache->set('/')->shouldNotBeCalled();
+        $sessionMiddleware = new SessionMiddleware(
+            'Thrall',
+            $sessionCache
+        );
+        $middleware = new ResponseCacheMiddleware([
+            '/',
+        ], ['foo'], $cache->reveal());
+        $next = function (ServerRequestInterface $request) {
+            /** @var Session $session */
+            $session = $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME);
+            $session->begin();
+            $session->setContents(['beer' => 'All the stouts!']);
+
+            return new Response(200, [], stream_for('no-cache'));
+        };
+
+        resolve((new MiddlewareRunner([
+            $sessionMiddleware,
+            $middleware,
+            $next,
+        ]))(
+            new ServerRequest('GET', 'https://example.com/')
+        ))->done(function (ResponseInterface $response) use (&$thenCalledCount) {
+            self::assertSame(200, $response->getStatusCode());
+            self::assertSame('no-cache', (string)$response->getBody());
+            $thenCalledCount++;
+        });
+
     }
 }
