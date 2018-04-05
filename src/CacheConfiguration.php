@@ -11,9 +11,9 @@ use function RingCentral\Psr7\stream_for;
 
 final class CacheConfiguration implements CacheConfigurationInterface
 {
-    const PREFIX_WITHOUT_QUERY = '***';
-    const PREFIX_WITH_QUERY = '???';
-    const PREFIXES = [
+    private const PREFIX_WITHOUT_QUERY = '***';
+    private const PREFIX_WITH_QUERY = '???';
+    private const PREFIXES = [
         self::PREFIX_WITH_QUERY,
         self::PREFIX_WITHOUT_QUERY,
     ];
@@ -36,7 +36,7 @@ final class CacheConfiguration implements CacheConfigurationInterface
     /**
      * @var array
      */
-    private $headers = [];
+    private $headers;
 
     /**
      * @var Clock
@@ -70,7 +70,7 @@ final class CacheConfiguration implements CacheConfigurationInterface
         }
 
         $uri = $request->getUri()->getPath();
-        if (!in_array($uri, $this->staticUrls, true) && !$this->matchesPrefixUrl($uri)) {
+        if (!\in_array($uri, $this->staticUrls, true) && !$this->matchesPrefixUrl($uri)) {
             return false;
         }
 
@@ -122,28 +122,28 @@ final class CacheConfiguration implements CacheConfigurationInterface
 
     public function cacheDecode(array $response): ResponseInterface
     {
-        $headers = (array)$response['headers'];
-        $headers['Age'] = (int)$this->clock->now()->format('U') - (int)$response['time'];
+        $response['headers'] = (array)$response['headers'];
+        $response['headers']['Age'] = (int)$this->clock->now()->format('U') - (int)$response['time'];
 
-        return new Response($response['code'], $headers, stream_for($response['body']));
+        return new Response($response['code'], $response['headers'], stream_for($response['body']));
     }
 
     private function sortUrls(array $urls)
     {
         foreach ($urls as $url) {
-            if (!(strlen($url) >= 3 && in_array(substr($url, -3), self::PREFIXES, true))) {
+            if (!(\strlen($url) >= 3 && \in_array(substr($url, -3), self::PREFIXES, true))) {
                 $this->staticUrls[] = $url;
 
                 continue;
             }
 
-            if (strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITHOUT_QUERY) {
+            if (\strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITHOUT_QUERY) {
                 $this->prefixUrlsWithoutQuery[] = substr($url, 0, -3);
 
                 continue;
             }
 
-            if (strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITH_QUERY) {
+            if (\strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITH_QUERY) {
                 $this->prefixUrlsWithQuery[] = substr($url, 0, -3);
 
                 continue;
@@ -168,8 +168,7 @@ final class CacheConfiguration implements CacheConfigurationInterface
     private function urlMatchesPrefixes(array $urls, string $uri): bool
     {
         foreach ($urls as $url) {
-            $urlLength = strlen($url);
-            if (substr($uri, 0, $urlLength) === $url) {
+            if (strpos($uri, $url) === 0) {
                 return true;
             }
         }
