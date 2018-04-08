@@ -32,15 +32,43 @@ final class ResponseCacheMiddlewareTest extends TestCase
         $clock = new FrozenClock($time);
         $now = $clock->now()->format('U');
         $cache = $this->prophesize(CacheInterface::class);
-        $cache->get('/')->shouldBeCalled()->willReturn(resolve(json_decode('{"code":200,"headers":{"foo":"bar"},"body":"' . md5('/') . '","time":' . $now . '}', true)));
+        $cache->get('/')->shouldBeCalled()->willReturn(resolve(msgpack_pack([
+            'code' => 200,
+            'headers' => [
+                'foo' => 'bar',
+            ],
+            'body' => md5('/'),
+            'time' => $now,
+        ])));
         $cache->get('/no.cache')->shouldBeCalled()->willReturn(reject());
-        $cache->set('/no.cache', json_decode('{"body":"' . md5('/no.cache') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}', true))->shouldBeCalled();
+        $cache->set('/no.cache', msgpack_pack([
+            'code' => 200,
+            'headers' => [
+                'foo' => 'bar',
+            ],
+            'body' => md5('/no.cache'),
+            'time' => $now,
+        ]))->shouldBeCalled();
         $cache->get('/stream')->shouldBeCalled()->willReturn(reject());
         $cache->set('/stream', $this->any())->shouldNotBeCalled();
         $cache->get('/wildcard/blaat')->shouldBeCalled()->willReturn(reject());
-        $cache->set('/wildcard/blaat', json_decode('{"body":"' . md5('/wildcard/blaat') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}', true))->shouldBeCalled();
+        $cache->set('/wildcard/blaat', msgpack_pack([
+            'code' => 200,
+            'headers' => [
+                'foo' => 'bar',
+            ],
+            'body' => md5('/wildcard/blaat'),
+            'time' => $now,
+        ]))->shouldBeCalled();
         $cache->get('/api/blaat?q=q')->shouldBeCalled()->willReturn(reject());
-        $cache->set('/api/blaat?q=q', json_decode('{"body":"' . md5('/api/blaat') . '","headers":{"foo":"bar"},"code":200,"time":' . $now . '}', true))->shouldBeCalled();
+        $cache->set('/api/blaat?q=q', msgpack_pack([
+            'code' => 200,
+            'headers' => [
+                'foo' => 'bar',
+            ],
+            'body' => md5('/api/blaat'),
+            'time' => $now,
+        ]))->shouldBeCalled();
         $sessionMiddleware = new SessionMiddleware(
             'Thrall',
             $sessionCache

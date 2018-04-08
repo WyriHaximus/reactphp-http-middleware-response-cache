@@ -101,7 +101,7 @@ final class CacheConfiguration implements CacheConfigurationInterface
         return $key;
     }
 
-    public function cacheEncode(ResponseInterface $response): array
+    public function cacheEncode(ResponseInterface $response): string
     {
         $headers = [];
         foreach ($this->headers as $header) {
@@ -112,16 +112,17 @@ final class CacheConfiguration implements CacheConfigurationInterface
             $headers[$header] = $response->getHeaderLine($header);
         }
 
-        return [
+        return msgpack_pack([
             'body' => (string)$response->getBody(),
             'headers' => $headers,
             'code' => $response->getStatusCode(),
             'time' => (int)$this->clock->now()->format('U'),
-        ];
+        ]);
     }
 
-    public function cacheDecode(array $response): ResponseInterface
+    public function cacheDecode(string $response): ResponseInterface
     {
+        $response = msgpack_unpack($response);
         $response['headers'] = (array)$response['headers'];
         $response['headers']['Age'] = (int)$this->clock->now()->format('U') - (int)$response['time'];
 

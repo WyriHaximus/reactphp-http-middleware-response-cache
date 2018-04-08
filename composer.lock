@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "598ea3a22e4d6ded3dc55f5e078df70d",
+    "content-hash": "6dcde614588e7e5917d23d8c8915773b",
     "packages": [
         {
             "name": "evenement/evenement",
@@ -623,6 +623,91 @@
                 "uri"
             ],
             "time": "2018-01-15T21:00:49+00:00"
+        },
+        {
+            "name": "rybakit/msgpack",
+            "version": "v0.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rybakit/msgpack.php.git",
+                "reference": "62ef0f629dbbe855ffed38d1b4c4d1130b6195a9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rybakit/msgpack.php/zipball/62ef0f629dbbe855ffed38d1b4c4d1130b6195a9",
+                "reference": "62ef0f629dbbe855ffed38d1b4c4d1130b6195a9",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.4|^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MessagePack\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Eugene Leonovich",
+                    "email": "gen.work@gmail.com"
+                }
+            ],
+            "description": "A pure PHP implementation of the MessagePack serialization format.",
+            "keywords": [
+                "messagepack",
+                "msgpack",
+                "pure",
+                "streaming"
+            ],
+            "time": "2017-03-11T15:48:37+00:00"
+        },
+        {
+            "name": "wyrihaximus/msgpack",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WyriHaximus/php-msgpack.git",
+                "reference": "0bb30e404ee4da5bbfde99f5a74b6441e50255b1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WyriHaximus/php-msgpack/zipball/0bb30e404ee4da5bbfde99f5a74b6441e50255b1",
+                "reference": "0bb30e404ee4da5bbfde99f5a74b6441e50255b1",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0",
+                "rybakit/msgpack": "^0.2.2"
+            },
+            "require-dev": {
+                "api-clients/test-utilities": "^4.3"
+            },
+            "suggest": {
+                "ext-msgpack": "For faster msgpack (un)packing"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/functions_include.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Cees-Jan Kiewiet",
+                    "email": "ceesjank@gmail.com"
+                }
+            ],
+            "description": "ext-msgpack polyfill using rybakit/msgpack",
+            "time": "2018-04-08T09:51:12+00:00"
         }
     ],
     "packages-dev": [
@@ -4135,12 +4220,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/WyriHaximus/reactphp-http-middleware-session.git",
-                "reference": "a453812067f868ac5dc27e30f5403e1357a35327"
+                "reference": "c5419f0132203b526c91ade10c315334efca09c2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WyriHaximus/reactphp-http-middleware-session/zipball/a453812067f868ac5dc27e30f5403e1357a35327",
-                "reference": "a453812067f868ac5dc27e30f5403e1357a35327",
+                "url": "https://api.github.com/repos/WyriHaximus/reactphp-http-middleware-session/zipball/c5419f0132203b526c91ade10c315334efca09c2",
+                "reference": "c5419f0132203b526c91ade10c315334efca09c2",
                 "shasum": ""
             },
             "require": {
@@ -4172,12 +4257,13 @@
                 }
             ],
             "description": "react/http middleware that takes care of session handling",
-            "time": "2018-03-29T08:36:55+00:00"
+            "time": "2018-04-07T16:31:22+00:00"
         }
     ],
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
+        "wyrihaximus/msgpack": 20,
         "wyrihaximus/react-http-middleware-session": 20
     },
     "prefer-stable": false,
