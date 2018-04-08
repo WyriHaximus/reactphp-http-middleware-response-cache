@@ -30,44 +30,44 @@ final class ResponseCacheMiddlewareTest extends TestCase
         $thenCalledCount = 0;
         $time = new DateTimeImmutable('now');
         $clock = new FrozenClock($time);
-        $now = $clock->now()->format('U');
+        $now = (int)$clock->now()->format('U');
         $cache = $this->prophesize(CacheInterface::class);
         $cache->get('/')->shouldBeCalled()->willReturn(resolve(msgpack_pack([
             'code' => 200,
+            'time' => $now,
             'headers' => [
                 'foo' => 'bar',
             ],
             'body' => md5('/'),
-            'time' => $now,
         ])));
         $cache->get('/no.cache')->shouldBeCalled()->willReturn(reject());
         $cache->set('/no.cache', msgpack_pack([
             'code' => 200,
+            'time' => $now,
             'headers' => [
                 'foo' => 'bar',
             ],
             'body' => md5('/no.cache'),
-            'time' => $now,
         ]))->shouldBeCalled();
         $cache->get('/stream')->shouldBeCalled()->willReturn(reject());
         $cache->set('/stream', $this->any())->shouldNotBeCalled();
         $cache->get('/wildcard/blaat')->shouldBeCalled()->willReturn(reject());
         $cache->set('/wildcard/blaat', msgpack_pack([
             'code' => 200,
+            'time' => $now,
             'headers' => [
                 'foo' => 'bar',
             ],
             'body' => md5('/wildcard/blaat'),
-            'time' => $now,
         ]))->shouldBeCalled();
         $cache->get('/api/blaat?q=q')->shouldBeCalled()->willReturn(reject());
         $cache->set('/api/blaat?q=q', msgpack_pack([
             'code' => 200,
+            'time' => $now,
             'headers' => [
                 'foo' => 'bar',
             ],
             'body' => md5('/api/blaat'),
-            'time' => $now,
         ]))->shouldBeCalled();
         $sessionMiddleware = new SessionMiddleware(
             'Thrall',

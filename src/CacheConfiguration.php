@@ -113,10 +113,10 @@ final class CacheConfiguration implements CacheConfigurationInterface
         }
 
         return msgpack_pack([
-            'body' => (string)$response->getBody(),
-            'headers' => $headers,
             'code' => $response->getStatusCode(),
             'time' => (int)$this->clock->now()->format('U'),
+            'headers' => $headers,
+            'body' => (string)$response->getBody(),
         ]);
     }
 
