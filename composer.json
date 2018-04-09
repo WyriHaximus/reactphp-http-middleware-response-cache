@@ -19,8 +19,7 @@
     },
     "require-dev": {
         "api-clients/test-utilities": "^4.2",
-        "ringcentral/psr7": "^1.2",
-        "wyrihaximus/react-http-middleware-session": "dev-master"
+        "ringcentral/psr7": "^1.2"
     },
     "autoload": {
         "psr-4": {

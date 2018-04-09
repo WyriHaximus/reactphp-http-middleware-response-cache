@@ -61,14 +61,6 @@ final class CacheConfiguration implements CacheConfigurationInterface
             return false;
         }
 
-        if (
-            class_exists(SessionMiddleware::class) &&
-            $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME) !== null &&
-            $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME)->isActive() === true
-        ) {
-            return false;
-        }
-
         $uri = $request->getUri()->getPath();
         if (!\in_array($uri, $this->staticUrls, true) && !$this->matchesPrefixUrl($uri)) {
             return false;
@@ -79,14 +71,6 @@ final class CacheConfiguration implements CacheConfigurationInterface
 
     public function responseIsCacheable(ServerRequestInterface $request, ResponseInterface $response): bool
     {
-        if (
-            class_exists(SessionMiddleware::class) &&
-            $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME) !== null &&
-            $request->getAttribute(SessionMiddleware::ATTRIBUTE_NAME)->isActive() === true
-        ) {
-            return false;
-        }
-
         return true;
     }
 
