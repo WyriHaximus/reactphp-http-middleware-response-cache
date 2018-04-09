@@ -15,7 +15,7 @@
         "react/cache": "^0.4.1",
         "react/http": "^0.8.0",
         "react/promise": "^2.5",
-        "wyrihaximus/msgpack": "dev-master"
+        "wyrihaximus/msgpack": "^1.0"
     },
     "require-dev": {
         "api-clients/test-utilities": "^4.2",
