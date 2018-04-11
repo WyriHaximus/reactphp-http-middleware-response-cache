@@ -49,6 +49,12 @@ $server = new Server([
 ]);
 ```
 
+# Sessions
+
+Using this middleware together with [`wyrihaximus/react-http-middleware-session`](https://github.com/WyriHaximus/reactphp-http-middleware-session) then 
+please take a look at [`wyrihaximus/react-http-middleware-response-cache-session-cache-configuration`](https://github.com/WyriHaximus/reactphp-http-middleware-response-cache-session-cache-configuration) to 
+ensure you don't serve cached responses to users with active sessions.
+
 # License
 
 The MIT License (MIT)
