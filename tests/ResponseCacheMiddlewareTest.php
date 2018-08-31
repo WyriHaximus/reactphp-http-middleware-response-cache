@@ -38,7 +38,7 @@ final class ResponseCacheMiddlewareTest extends TestCase
             ],
             'body' => md5('/'),
         ])));
-        $cache->get('/no.cache')->shouldBeCalled()->willReturn(reject());
+        $cache->get('/no.cache')->shouldBeCalled()->willReturn(resolve());
         $cache->set('/no.cache', msgpack_pack([
             'code' => 200,
             'time' => $now,
@@ -46,10 +46,10 @@ final class ResponseCacheMiddlewareTest extends TestCase
                 'foo' => 'bar',
             ],
             'body' => md5('/no.cache'),
-        ]))->shouldBeCalled();
-        $cache->get('/stream')->shouldBeCalled()->willReturn(reject());
+        ]), null)->shouldBeCalled();
+        $cache->get('/stream')->shouldBeCalled()->willReturn(resolve());
         $cache->set('/stream', $this->any())->shouldNotBeCalled();
-        $cache->get('/wildcard/blaat')->shouldBeCalled()->willReturn(reject());
+        $cache->get('/wildcard/blaat')->shouldBeCalled()->willReturn(resolve());
         $cache->set('/wildcard/blaat', msgpack_pack([
             'code' => 200,
             'time' => $now,
@@ -57,8 +57,8 @@ final class ResponseCacheMiddlewareTest extends TestCase
                 'foo' => 'bar',
             ],
             'body' => md5('/wildcard/blaat'),
-        ]))->shouldBeCalled();
-        $cache->get('/api/blaat?q=q')->shouldBeCalled()->willReturn(reject());
+        ]), null)->shouldBeCalled();
+        $cache->get('/api/blaat?q=q')->shouldBeCalled()->willReturn(resolve());
         $cache->set('/api/blaat?q=q', msgpack_pack([
             'code' => 200,
             'time' => $now,
@@ -66,7 +66,7 @@ final class ResponseCacheMiddlewareTest extends TestCase
                 'foo' => 'bar',
             ],
             'body' => md5('/api/blaat'),
-        ]))->shouldBeCalled();
+        ]), null)->shouldBeCalled();
         $middleware = new ResponseCacheMiddleware(new CacheConfiguration([
             '/',
             '/no.cache',

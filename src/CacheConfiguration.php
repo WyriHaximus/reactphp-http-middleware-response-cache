@@ -44,15 +44,22 @@ final class CacheConfiguration implements CacheConfigurationInterface
     private $clock;
 
     /**
-     * @param array      $urls
-     * @param array      $headers
-     * @param Clock|null $clock
+     * @var null|callable
      */
-    public function __construct(array $urls, array $headers = [], Clock $clock = null)
+    private $ttl;
+
+    /**
+     * @param array $urls
+     * @param array $headers
+     * @param Clock|null $clock
+     * @param callable|null $ttl
+     */
+    public function __construct(array $urls, array $headers = [], Clock $clock = null, callable $ttl = null)
     {
         $this->sortUrls($urls);
         $this->headers = $headers;
         $this->clock = $clock instanceof Clock ? $clock : new SystemClock();
+        $this->ttl = $ttl;
     }
 
     public function requestIsCacheable(ServerRequestInterface $request): bool
@@ -83,6 +90,15 @@ final class CacheConfiguration implements CacheConfigurationInterface
         }
 
         return $key;
+    }
+
+    public function cacheTtl(ServerRequestInterface $request, ResponseInterface $response): ?int
+    {
+        if ($this->ttl === null) {
+            return null;
+        }
+
+        return ($this->ttl)($request, $response);
     }
 
     public function cacheEncode(ResponseInterface $response): string

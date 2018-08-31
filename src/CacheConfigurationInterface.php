@@ -35,6 +35,13 @@ interface CacheConfigurationInterface
     public function cacheKey(ServerRequestInterface $request): string;
 
     /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @return int|null
+     */
+    public function cacheTtl(ServerRequestInterface $request, ResponseInterface $response): ?int;
+
+    /**
      * Encode the response to be stored in the cache. Must return a string in a
      * format `cacheDecode` can decode into a response.
      *
