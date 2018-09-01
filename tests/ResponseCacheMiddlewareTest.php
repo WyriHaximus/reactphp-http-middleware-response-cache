@@ -16,7 +16,6 @@ use React\Http\Response;
 use React\Stream\ThroughStream;
 use WyriHaximus\React\Http\Middleware\CacheConfiguration;
 use WyriHaximus\React\Http\Middleware\ResponseCacheMiddleware;
-use function React\Promise\reject;
 use function React\Promise\resolve;
 use function RingCentral\Psr7\stream_for;
 

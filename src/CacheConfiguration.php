@@ -49,9 +49,9 @@ final class CacheConfiguration implements CacheConfigurationInterface
     private $ttl;
 
     /**
-     * @param array $urls
-     * @param array $headers
-     * @param Clock|null $clock
+     * @param array         $urls
+     * @param array         $headers
+     * @param Clock|null    $clock
      * @param callable|null $ttl
      */
     public function __construct(array $urls, array $headers = [], Clock $clock = null, callable $ttl = null)
