@@ -40,9 +40,11 @@ final class ResponseCacheMiddleware
 
         $key = $this->cacheConfiguration->cacheKey($request);
 
-        return $this->cache->get($key)->then(function ($json) {
-            return $this->cacheConfiguration->cacheDecode($json);
-        }, function () use ($next, $request, $key) {
+        return $this->cache->get($key)->then(function ($json) use ($next, $request, $key) {
+            if ($json !== null) {
+                return $this->cacheConfiguration->cacheDecode($json);
+            }
+
             return resolve($next($request))->then(function (ResponseInterface $response) use ($request, $key) {
                 if ($response->getBody() instanceof HttpBodyStream) {
                     return $response;
@@ -52,9 +54,10 @@ final class ResponseCacheMiddleware
                     return $response;
                 }
 
+                $ttl = $this->cacheConfiguration->cacheTtl($request, $response);
                 $body = (string)$response->getBody();
                 $encodedResponse = $this->cacheConfiguration->cacheEncode($response->withBody(stream_for($body)));
-                $this->cache->set($key, $encodedResponse);
+                $this->cache->set($key, $encodedResponse, $ttl);
 
                 return $response->withBody(stream_for($body));
             });
