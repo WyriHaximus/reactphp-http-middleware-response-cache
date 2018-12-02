@@ -129,23 +129,23 @@ final class CacheConfiguration implements CacheConfigurationInterface
         return new Response($response['code'], $response['headers'], stream_for($response['body']));
     }
 
-    private function sortUrls(array $urls)
+    private function sortUrls(array $urls): void
     {
         foreach ($urls as $url) {
-            if (!(\strlen($url) >= 3 && \in_array(substr($url, -3), self::PREFIXES, true))) {
+            if (!(\strlen($url) >= 3 && \in_array(\substr($url, -3), self::PREFIXES, true))) {
                 $this->staticUrls[] = $url;
 
                 continue;
             }
 
-            if (\strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITHOUT_QUERY) {
-                $this->prefixUrlsWithoutQuery[] = substr($url, 0, -3);
+            if (\strlen($url) >= 3 && \substr($url, -3) === self::PREFIX_WITHOUT_QUERY) {
+                $this->prefixUrlsWithoutQuery[] = \substr($url, 0, -3);
 
                 continue;
             }
 
-            if (\strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITH_QUERY) {
-                $this->prefixUrlsWithQuery[] = substr($url, 0, -3);
+            if (\strlen($url) >= 3 && \substr($url, -3) === self::PREFIX_WITH_QUERY) {
+                $this->prefixUrlsWithQuery[] = \substr($url, 0, -3);
 
                 continue;
             }
@@ -169,7 +169,7 @@ final class CacheConfiguration implements CacheConfigurationInterface
     private function urlMatchesPrefixes(array $urls, string $uri): bool
     {
         foreach ($urls as $url) {
-            if (strpos($uri, $url) === 0) {
+            if (\strpos($uri, $url) === 0) {
                 return true;
             }
         }
