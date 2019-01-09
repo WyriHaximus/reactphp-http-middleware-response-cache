@@ -631,23 +631,23 @@
         },
         {
             "name": "rybakit/msgpack",
-            "version": "v0.5.3",
+            "version": "v0.5.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rybakit/msgpack.php.git",
-                "reference": "2c2f046ad6f2cc013770487517eaa99a6fec102a"
+                "reference": "4e393dfd64b244814432c774661c6d54bdacee62"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rybakit/msgpack.php/zipball/2c2f046ad6f2cc013770487517eaa99a6fec102a",
-                "reference": "2c2f046ad6f2cc013770487517eaa99a6fec102a",
+                "url": "https://api.github.com/repos/rybakit/msgpack.php/zipball/4e393dfd64b244814432c774661c6d54bdacee62",
+                "reference": "4e393dfd64b244814432c774661c6d54bdacee62",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.1.1"
             },
             "require-dev": {
-                "friendsofphp/php-cs-fixer": "^2.12",
+                "friendsofphp/php-cs-fixer": "^2.13",
                 "phpunit/phpunit": "^7.1"
             },
             "type": "library",
@@ -673,7 +673,7 @@
                 "pure",
                 "streaming"
             ],
-            "time": "2018-06-15T22:56:26+00:00"
+            "time": "2019-01-01T22:07:02+00:00"
         },
         {
             "name": "wyrihaximus/msgpack",
