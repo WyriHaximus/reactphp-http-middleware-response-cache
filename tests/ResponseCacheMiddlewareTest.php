@@ -13,11 +13,11 @@ use React\Http\Io\HttpBodyStream;
 use React\Http\Io\MiddlewareRunner;
 use React\Http\Io\ServerRequest;
 use React\Http\Response;
+use function React\Promise\resolve;
 use React\Stream\ThroughStream;
+use function RingCentral\Psr7\stream_for;
 use WyriHaximus\React\Http\Middleware\CacheConfiguration;
 use WyriHaximus\React\Http\Middleware\ResponseCacheMiddleware;
-use function React\Promise\resolve;
-use function RingCentral\Psr7\stream_for;
 
 /**
  * @internal
