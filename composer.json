@@ -18,7 +18,7 @@
         "wyrihaximus/msgpack": "^1.0"
     },
     "require-dev": {
-        "api-clients/test-utilities": "^5.4",
+        "wyrihaximus/async-test-utilities": "^1.1",
         "ringcentral/psr7": "^1.2"
     },
     "autoload": {

@@ -4,7 +4,6 @@ namespace WyriHaximus\React\Tests\Http\Middleware;
 
 use DateTimeImmutable;
 use Lcobucci\Clock\FrozenClock;
-use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use React\Cache\ArrayCache;
@@ -16,13 +15,14 @@ use React\Http\Response;
 use function React\Promise\resolve;
 use React\Stream\ThroughStream;
 use function RingCentral\Psr7\stream_for;
+use WyriHaximus\AsyncTestUtilities\AsyncTestCase;
 use WyriHaximus\React\Http\Middleware\CacheConfiguration;
 use WyriHaximus\React\Http\Middleware\ResponseCacheMiddleware;
 
 /**
  * @internal
  */
-final class ResponseCacheMiddlewareTest extends TestCase
+final class ResponseCacheMiddlewareTest extends AsyncTestCase
 {
     public function testBasics(): void
     {
