@@ -59,7 +59,7 @@ ensure you don't serve cached responses to users with active sessions.
 
 The MIT License (MIT)
 
-Copyright (c) 2018 Cees-Jan Kiewiet
+Copyright (c) 2026 Cees-Jan Kiewiet
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

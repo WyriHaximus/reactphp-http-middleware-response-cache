@@ -1,93 +1,63 @@
 {
-    "name": "wyrihaximus/react-http-middleware-response-cache",
-    "description": "Response caching middleware for @reactphp's HTTP server",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Cees-Jan Kiewiet",
-            "email": "ceesjank@gmail.com"
-        }
-    ],
-    "require": {
-        "php": "^7.2",
-        "lcobucci/clock": "^1.1",
-        "psr/http-message": "^1.0",
-        "react/cache": "^1.0 || 0.6 || ^0.5.0",
-        "react/http": "^1.0.0",
-        "react/promise": "^2.7",
-        "wyrihaximus/msgpack": "^1.0"
-    },
-    "require-dev": {
-        "wyrihaximus/async-test-utilities": "^1.1",
-        "ringcentral/psr7": "^1.2"
-    },
-    "autoload": {
-        "psr-4": {
-            "WyriHaximus\\React\\Http\\Middleware\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "WyriHaximus\\React\\Tests\\Http\\Middleware\\": "tests/"
-        }
-    },
-    "config": {
-        "sort-packages": true,
-        "platform": {
-            "php": "7.2"
-        }
-    },
-    "scripts": {
-        "ensure-installed": "composer install --ansi -n -q",
-        "cs": [
-            "@ensure-installed",
-            "php-cs-fixer fix --config=.php_cs --ansi --dry-run --diff --verbose --allow-risky=yes --show-progress=estimating"
-        ],
-        "cs-fix": [
-            "@ensure-installed",
-            "php-cs-fixer fix --config=.php_cs --ansi --verbose --allow-risky=yes --show-progress=estimating"
-        ],
-        "unit": [
-            "@ensure-installed",
-            "phpunit --colors=always -c phpunit.xml.dist"
-        ],
-        "unit-coverage": [
-            "@ensure-installed",
-            "phpunit --colors=always -c phpunit.xml.dist --coverage-text --coverage-html covHtml --coverage-clover ./build/logs/clover.xml"
-        ],
-        "lint-php": [
-            "@ensure-installed",
-            "parallel-lint --exclude vendor ."
-        ],
-        "qa-all": [
-            "@lint-php",
-            "@cs",
-            "@unit"
-        ],
-        "qa-all-coverage": [
-            "@lint-php",
-            "@cs",
-            "@unit-coverage"
-        ],
-        "qa-windows": [
-            "@lint-php",
-            "@cs",
-            "@unit"
-        ],
-        "qa-ci": [
-            "@unit"
-        ],
-        "qa-ci-extended": [
-            "@qa-all-coverage"
-        ],
-        "qa-ci-windows": [
-            "@qa-windows"
-        ],
-        "qa-contrib": [
-            "@qa-all"
-        ],
-        "ci-coverage": [
-            "if [ -f ./build/logs/clover.xml ]; then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./build/logs/clover.xml; fi"
-        ]
+  "name": "wyrihaximus/react-http-middleware-response-cache",
+  "description": "Response caching middleware for @reactphp's HTTP server",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Cees-Jan Kiewiet",
+      "email": "ceesjank@gmail.com"
     }
+  ],
+  "require": {
+    "php": "^8.4",
+    "ancarda/psr7-string-stream": "^1.4.0",
+    "lcobucci/clock": "^1.4.0",
+    "nyholm/psr7": "^1.8",
+    "psr/http-message": "^1.1.0",
+    "react/cache": "^1.2.0",
+    "react/http": "^1.11.0",
+    "react/promise": "^3.3.0",
+    "wyrihaximus/msgpack": "^1.2.0"
+  },
+  "require-dev": {
+    "wyrihaximus/async-test-utilities": "^13.2.0",
+    "wyrihaximus/makefiles": "^0.12.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "WyriHaximus\\React\\Http\\Middleware\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WyriHaximus\\React\\Tests\\Http\\Middleware\\": "tests/"
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "ergebnis/composer-normalize": true,
+      "infection/extension-installer": true,
+      "phpstan/extension-installer": true,
+      "wyrihaximus/makefiles": true,
+      "wyrihaximus/test-utilities": true
+    },
+    "platform": {
+      "php": "8.4.13"
+    },
+    "sort-packages": true
+  },
+  "extra": {
+    "unused": [
+      "wyrihaximus/msgpack"
+    ]
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "make on-install-or-update || true"
+    ],
+    "post-update-cmd": [
+      "make on-install-or-update || true"
+    ]
+  }
 }
