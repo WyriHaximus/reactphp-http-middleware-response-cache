@@ -53,7 +53,7 @@ final class CacheConfiguration implements CacheConfigurationInterface
     public function __construct(array $urls, private readonly array $headers = [], Clock|null $clock = null, callable|null $ttl = null)
     {
         $this->sortUrls($urls);
-        $this->clock = $clock instanceof Clock ? $clock : new SystemClock();
+        $this->clock = $clock instanceof Clock ? $clock : SystemClock::fromSystemTimezone();
         $this->ttl   = $ttl;
     }
 
