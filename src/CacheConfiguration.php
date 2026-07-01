@@ -1,65 +1,60 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace WyriHaximus\React\Http\Middleware;
 
+use Ancarda\Psr7\StringStream\StringStream;
 use Lcobucci\Clock\Clock;
 use Lcobucci\Clock\SystemClock;
+use Nyholm\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use RingCentral\Psr7\Response;
-use function RingCentral\Psr7\stream_for;
 
+use function array_any;
+use function in_array;
+use function msgpack_pack;
+use function msgpack_unpack;
+use function str_starts_with;
+use function strlen;
+use function substr;
+
+/** @api */
 final class CacheConfiguration implements CacheConfigurationInterface
 {
-    private const PREFIX_WITHOUT_QUERY = '***';
-    private const PREFIX_WITH_QUERY = '???';
-    private const PREFIXES = [
+    private const string PREFIX_WITHOUT_QUERY = '***';
+    private const string PREFIX_WITH_QUERY    = '???';
+    private const array PREFIXES              = [
         self::PREFIX_WITH_QUERY,
         self::PREFIX_WITHOUT_QUERY,
     ];
 
-    /**
-     * @var array
-     */
-    private $staticUrls = [];
+    /** @var array<string> */
+    private array $staticUrls = [];
 
-    /**
-     * @var array
-     */
-    private $prefixUrlsWithoutQuery = [];
+    /** @var array<string> */
+    private array $prefixUrlsWithoutQuery = [];
 
-    /**
-     * @var array
-     */
-    private $prefixUrlsWithQuery = [];
+    /** @var array<string> */
+    private array $prefixUrlsWithQuery = [];
 
-    /**
-     * @var array
-     */
-    private $headers;
+    private readonly Clock $clock;
 
-    /**
-     * @var Clock
-     */
-    private $clock;
-
-    /**
-     * @var null|callable
-     */
+    /** @var (callable(ServerRequestInterface, ResponseInterface): (int|null))|null */
     private $ttl;
 
     /**
-     * @param array         $urls
-     * @param array         $headers
-     * @param Clock|null    $clock
-     * @param callable|null $ttl
+     * @param array<string>                                                          $urls
+     * @param array<string>                                                          $headers
+     * @param (callable(ServerRequestInterface, ResponseInterface): (int|null))|null $ttl
+     *
+     * @phpstan-ignore ergebnis.noParameterWithNullDefaultValue,ergebnis.noParameterWithNullDefaultValue,ergebnis.noConstructorParameterWithDefaultValue,ergebnis.noConstructorParameterWithDefaultValue,ergebnis.noConstructorParameterWithDefaultValue,ergebnis.noParameterWithNullableTypeDeclaration,ergebnis.noParameterWithNullableTypeDeclaration
      */
-    public function __construct(array $urls, array $headers = [], Clock $clock = null, callable $ttl = null)
+    public function __construct(array $urls, private readonly array $headers = [], Clock|null $clock = null, callable|null $ttl = null)
     {
         $this->sortUrls($urls);
-        $this->headers = $headers;
         $this->clock = $clock instanceof Clock ? $clock : new SystemClock();
-        $this->ttl = $ttl;
+        $this->ttl   = $ttl;
     }
 
     public function requestIsCacheable(ServerRequestInterface $request): bool
@@ -69,11 +64,8 @@ final class CacheConfiguration implements CacheConfigurationInterface
         }
 
         $uri = $request->getUri()->getPath();
-        if (!\in_array($uri, $this->staticUrls, true) && !$this->matchesPrefixUrl($uri)) {
-            return false;
-        }
 
-        return true;
+        return ! (! in_array($uri, $this->staticUrls, true) && ! $this->matchesPrefixUrl($uri));
     }
 
     public function responseIsCacheable(ServerRequestInterface $request, ResponseInterface $response): bool
@@ -83,16 +75,16 @@ final class CacheConfiguration implements CacheConfigurationInterface
 
     public function cacheKey(ServerRequestInterface $request): string
     {
-        $key = $request->getUri()->getPath();
+        $key   = $request->getUri()->getPath();
         $query = $request->getUri()->getQuery();
-        if (\strlen($query) > 0 && $this->queryInKey($key)) {
+        if ($query !== '' && $this->queryInKey($key)) {
             $key .= '?' . $query;
         }
 
         return $key;
     }
 
-    public function cacheTtl(ServerRequestInterface $request, ResponseInterface $response): ?int
+    public function cacheTtl(ServerRequestInterface $request, ResponseInterface $response): int|null
     {
         if ($this->ttl === null) {
             return null;
@@ -105,7 +97,7 @@ final class CacheConfiguration implements CacheConfigurationInterface
     {
         $headers = [];
         foreach ($this->headers as $header) {
-            if (!$response->hasHeader($header)) {
+            if (! $response->hasHeader($header)) {
                 continue;
             }
 
@@ -114,41 +106,44 @@ final class CacheConfiguration implements CacheConfigurationInterface
 
         return msgpack_pack([
             'code' => $response->getStatusCode(),
-            'time' => (int)$this->clock->now()->format('U'),
+            'time' => (int) $this->clock->now()->format('U'),
             'headers' => $headers,
-            'body' => (string)$response->getBody(),
+            'body' => (string) $response->getBody(),
         ]);
     }
 
     public function cacheDecode(string $response): ResponseInterface
     {
-        $response = msgpack_unpack($response);
-        $response['headers'] = (array)$response['headers'];
-        $response['headers']['Age'] = (int)$this->clock->now()->format('U') - (int)$response['time'];
+        /** @var array{code: int, time: int, headers: array<string, string>, body: string} $decoded */
+        $decoded                   = msgpack_unpack($response);
+        $decoded['headers']['Age'] = (int) $this->clock->now()->format('U') - $decoded['time'];
 
-        return new Response($response['code'], $response['headers'], stream_for($response['body']));
+        return new Response($decoded['code'], $decoded['headers'], new StringStream($decoded['body']));
     }
 
+    /** @param array<string> $urls */
     private function sortUrls(array $urls): void
     {
         foreach ($urls as $url) {
-            if (!(\strlen($url) >= 3 && \in_array(\substr($url, -3), self::PREFIXES, true))) {
+            if (! (strlen($url) >= 3 && in_array(substr($url, -3), self::PREFIXES, true))) {
                 $this->staticUrls[] = $url;
 
                 continue;
             }
 
-            if (\strlen($url) >= 3 && \substr($url, -3) === self::PREFIX_WITHOUT_QUERY) {
-                $this->prefixUrlsWithoutQuery[] = \substr($url, 0, -3);
+            /** @phpstan-ignore greaterOrEqual.alwaysTrue */
+            if (strlen($url) >= 3 && substr($url, -3) === self::PREFIX_WITHOUT_QUERY) {
+                $this->prefixUrlsWithoutQuery[] = substr($url, 0, -3);
 
                 continue;
             }
 
-            if (\strlen($url) >= 3 && \substr($url, -3) === self::PREFIX_WITH_QUERY) {
-                $this->prefixUrlsWithQuery[] = \substr($url, 0, -3);
-
+            /** @phpstan-ignore smaller.alwaysFalse */
+            if (strlen($url) < 3 || substr($url, -3) !== self::PREFIX_WITH_QUERY) {
                 continue;
             }
+
+            $this->prefixUrlsWithQuery[] = substr($url, 0, -3);
         }
     }
 
@@ -166,14 +161,9 @@ final class CacheConfiguration implements CacheConfigurationInterface
         return $this->urlMatchesPrefixes($this->prefixUrlsWithQuery, $uri);
     }
 
+    /** @param array<string> $urls */
     private function urlMatchesPrefixes(array $urls, string $uri): bool
     {
-        foreach ($urls as $url) {
-            if (\strpos($uri, $url) === 0) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($urls, static fn (string $url): bool => str_starts_with($uri, $url));
     }
 }
