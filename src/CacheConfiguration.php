@@ -65,7 +65,7 @@ final class CacheConfiguration implements CacheConfigurationInterface
 
         $uri = $request->getUri()->getPath();
 
-        return ! (! in_array($uri, $this->staticUrls, true) && ! $this->matchesPrefixUrl($uri));
+        return in_array($uri, $this->staticUrls, true) || $this->matchesPrefixUrl($uri);
     }
 
     public function responseIsCacheable(ServerRequestInterface $request, ResponseInterface $response): bool
@@ -125,7 +125,7 @@ final class CacheConfiguration implements CacheConfigurationInterface
     private function sortUrls(array $urls): void
     {
         foreach ($urls as $url) {
-            if (! (strlen($url) >= 3 && in_array(substr($url, -3), self::PREFIXES, true))) {
+            if (strlen($url) < 3 || ! in_array(substr($url, -3), self::PREFIXES, true)) {
                 $this->staticUrls[] = $url;
 
                 continue;
