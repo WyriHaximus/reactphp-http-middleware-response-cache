@@ -20,7 +20,7 @@
         "wyrihaximus/msgpack": "^1.2.0"
     },
     "require-dev": {
-        "wyrihaximus/async-test-utilities": "^13.4.1",
+        "wyrihaximus/async-test-utilities": "^13.5.0",
         "wyrihaximus/makefiles": "^0.13.3"
     },
     "autoload": {
